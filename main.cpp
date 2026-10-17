@@ -73,9 +73,12 @@ void buildDAG(vector<client>& clients, vector<vector<int>>& matrix) {
 int main() {
     vector<client> clients;
     vector<vector<int>> matrix;
-    // Didn't say anything about user input so I just slapped it on like this
-    string filename = "data1.txt";
+    string filename;
+    cout << "Enter the file to read data: ";
+    cin >> filename;
 
     readFile(filename,clients);
+
+    cout << "There are " << clients.size() << " clients in this file\n";
     buildDAG(clients, matrix);
 }
