@@ -2,4 +2,8 @@
 Oscar Huitron-Gonzalez\
 Shakira Garcia\
 \
-No extra-credit alterations were made.
+No extra-credit alterations were made.\
+\
+To run the program:\
+Type the name of input file, such as data1.txt\
+Please note that these files must be inside the directory data/data/data1.txt but you only have to type the filename itself.
