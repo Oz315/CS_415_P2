@@ -134,8 +134,6 @@ vector<int> topologicalSort(const vector<vector<int>>& matrix) {
     return topoOrder;
 }
 
-
-
 void calculateRevenue(const vector<client>& clients,
      const vector<vector<int>>& matrix,
      const vector<int>& topoOrder,
@@ -195,8 +193,31 @@ void calculateRevenue(const vector<client>& clients,
     }
 }
 
+vector<int> computeOptimalPath(const vector<int>& opt,
+    const vector<client>& clients) {
 
+    // End is after all the clients in the matrix
+    int end = clients.size() + 1;
 
+    // This will hold the clients that give the best revenue
+    vector<int> chosenClients;
+
+    // Start at the first client saved in opt
+    int current = opt[0];
+
+    // Keep going until we reach End
+    while (current != end && current != -1) {
+
+        // Save the client number in our list
+        chosenClients.push_back(current);
+
+        // Move to the next best client from opt
+        current = opt[current];
+    }
+
+    // Return the list of clients we picked
+    return chosenClients;
+}
 
 
 int main() {
@@ -258,6 +279,25 @@ int main() {
 
     // Print the highest revenue starting from Start
     cout << "Optimal revenue earned is " << F[0] << endl;
+
+    // Get the clients that give us the highest revenue
+    vector<int> chosenClients = computeOptimalPath(opt, clients);
+
+    // Print the clients we picked
+    cout << "Clients contributing to this optimal revenue: ";
+
+    for (int i = 0; i < chosenClients.size(); i++) {
+
+        // Put commas between the client numbers
+        if (i > 0) {
+            cout << ", ";
+        }
+
+        // Print the client number
+        cout << chosenClients[i];
+    }
+
+    cout << endl;
 
     return 0;
 
