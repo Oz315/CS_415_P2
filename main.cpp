@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <queue>
 
 using namespace std;
 
@@ -70,6 +71,134 @@ void buildDAG(vector<client>& clients, vector<vector<int>>& matrix) {
     }
 }
 
+vector<int> topologicalSort(const vector<vector<int>>& matrix) {
+
+    // Get the total number of vertices, including Start and End
+    int size = matrix.size();
+
+    // Keep track of incoming edges for each vertex
+    vector<int> inDegree(size, 0);
+
+    // This will hold the sorted order
+    vector<int> topoOrder;
+    queue<int> q;
+
+    // Count how many edges are going into each vertex
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            if (matrix[i][j] == 1) {
+                inDegree[j]++;
+            }
+        }
+    }
+
+    // Put the vertices with no incoming edges into the queue
+    for (int i = 0; i < size; i++) {
+        if (inDegree[i] == 0) {
+            q.push(i);
+        }
+    }
+
+    // Keep taking vertices out until the queue is empty
+    while (!q.empty()) {
+
+        // Get the first vertex and remove it from the queue
+        int current = q.front();
+        q.pop();
+
+        // Add this vertex to the sorted list
+        topoOrder.push_back(current);
+
+        // Look at the edges leaving this vertex
+        for (int j = 0; j < size; j++) {
+            if (matrix[current][j] == 1) {
+
+                // Subtract one incoming edge without changing the matrix
+                inDegree[j]--;
+
+                // If nothing points to this vertex anymore, add it
+                if (inDegree[j] == 0) {
+                    q.push(j);
+                }
+            }
+        }
+    }
+
+    // Check if we were able to sort all the vertices
+    if (topoOrder.size() != matrix.size()) {
+        cout << "Could not finish topological sorting." << endl;
+        return {};
+    }
+
+    // Send back the finished topological order
+    return topoOrder;
+}
+
+
+
+void calculateRevenue(const vector<client>& clients,
+     const vector<vector<int>>& matrix,
+     const vector<int>& topoOrder,
+     vector<long long>& F,
+     vector<int>& opt) {
+
+    int size = matrix.size();
+    int end = clients.size() + 1;
+
+    // Make space for the F and opt values
+    F.assign(size, 0);
+    opt.assign(size, -1);
+
+    // End doesn't have any revenue
+    F[end] = 0;
+
+    // Go backwards through the topological order
+    for (int i = (int)topoOrder.size() - 1; i >= 0; i--) {
+
+        int current = topoOrder[i];
+
+        // We already know the F value for End
+        if (current == end) {
+            continue;
+        }
+
+        // Start doesn't have any money
+        int money = 0;
+
+        // Get the money for the current client
+        if (current != 0) {
+            money = clients[current - 1].money;
+        }
+
+        long long best = -1;
+
+        // Check all the vertices that current can go to
+        for (int j = 0; j < size; j++) {
+
+            if (matrix[current][j] == 1) {
+
+                // Add this client's money to the next F value
+                long long total = money + F[j];
+
+                // If this gives more money, save it
+                if (total > best) {
+                    best = total;
+                    opt[current] = j;
+                }
+            }
+        }
+
+        // Save the highest revenue we found for current
+        if (best != -1) {
+            F[current] = best;
+        }
+    }
+}
+
+
+
+
+
 int main() {
     vector<client> clients;
     vector<vector<int>> matrix;
@@ -81,4 +210,55 @@ int main() {
 
     cout << "There are " << clients.size() << " clients in this file\n";
     buildDAG(clients, matrix);
+    
+    // Get the topological order from the matrix
+    vector<int> topoOrder = topologicalSort(matrix);
+
+   // Check if topological sorting worked before moving on
+    if (topoOrder.size() != matrix.size()) {
+        return 1;
+    }
+
+    // Print it just to see if it worked
+    cout << "Topological order: ";
+
+    int totalVertices = topoOrder.size();
+    int end = clients.size() + 1;
+
+    for (int i = 0; i < totalVertices; i++) {
+
+        // Check if the current vertex is Start
+        if (topoOrder[i] == 0) {
+            cout << "Start";
+        }
+
+        // Check if we reached the End vertex
+        else if (topoOrder[i] == end) {
+            cout << "End";
+        }
+
+        // Otherwise print the client number
+        else {
+            cout << "C" << topoOrder[i];
+        }
+
+        if (i + 1 < totalVertices) {
+            cout << ", ";
+        }
+    }
+
+    cout << endl;
+
+    // These will hold the revenue and best next vertices
+    vector<long long> F;
+    vector<int> opt;
+
+    // Calculate the highest revenue using the topological order
+    calculateRevenue(clients, matrix, topoOrder, F, opt);
+
+    // Print the highest revenue starting from Start
+    cout << "Optimal revenue earned is " << F[0] << endl;
+
+    return 0;
+
 }
