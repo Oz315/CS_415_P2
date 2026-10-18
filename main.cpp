@@ -15,7 +15,8 @@ struct client {
 
 void readFile(const string& inputFile, vector<client>& clients) {
     ifstream data;
-    data.open(inputFile);
+    string fullInput = "data/data/" + inputFile;
+    data.open(fullInput);
     if (!data.is_open()) {
         cerr << "Error opening file" << endl;
         return;
@@ -219,17 +220,30 @@ vector<int> computeOptimalPath(const vector<int>& opt,
     return chosenClients;
 }
 
+void writeFiles(const string& filename, const string& output) {
+    ofstream out;
+    string outputFileName = "output/out" + filename;
+    out.open(outputFileName);
+    if (!out.is_open()) {
+        cerr << "Error opening file" << endl;
+        return;
+    }
+    out << output;
+}
 
 int main() {
     vector<client> clients;
     vector<vector<int>> matrix;
     string filename;
-    cout << "Enter the file to read data: ";
+    string outText; // This is for writing output to outFile
+    cout << "Enter the file to read data:";
     cin >> filename;
 
+    outText += "Enter the file to read data: " + filename + "\n";
     readFile(filename,clients);
 
-    cout << "There are " << clients.size() << " clients in this file\n";
+    cout << "\nThere are " << clients.size() << " clients in this file\n\n";
+    outText += "\nThere are " + to_string(clients.size()) + " clients in this file\n\n";
     buildDAG(clients, matrix);
     
     // Get the topological order from the matrix
@@ -240,6 +254,7 @@ int main() {
         return 1;
     }
 
+    /*
     // Print it just to see if it worked
     cout << "Topological order: ";
 
@@ -269,7 +284,7 @@ int main() {
     }
 
     cout << endl;
-
+    */
     // These will hold the revenue and best next vertices
     vector<long long> F;
     vector<int> opt;
@@ -279,26 +294,30 @@ int main() {
 
     // Print the highest revenue starting from Start
     cout << "Optimal revenue earned is " << F[0] << endl;
-
+    outText += "Optimal revenue earned is " + to_string(F[0]) + "\n";
     // Get the clients that give us the highest revenue
     vector<int> chosenClients = computeOptimalPath(opt, clients);
 
     // Print the clients we picked
     cout << "Clients contributing to this optimal revenue: ";
-
+    outText += "Clients contributing to this optimal revenue: ";
     for (int i = 0; i < chosenClients.size(); i++) {
 
         // Put commas between the client numbers
         if (i > 0) {
             cout << ", ";
+            outText += ", ";
         }
 
         // Print the client number
         cout << chosenClients[i];
+        outText += to_string(chosenClients[i]);
     }
 
     cout << endl;
+    outText += "\n";
 
+    writeFiles(filename, outText);
     return 0;
 
 }

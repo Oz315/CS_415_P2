@@ -1,0 +1,6 @@
+Enter the file to read data: data3.txt
+
+There are 11 clients in this file
+
+Optimal revenue earned is 1765
+Clients contributing to this optimal revenue: 6, 11, 2
